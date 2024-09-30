@@ -30,12 +30,12 @@ pipeline{
         }
         stage('run dockerfile'){
           steps{
-               sh 'docker build -t myimgcare .'
+               sh 'docker build -t myimglatest .'
            }
          }
         stage('port expose'){
             steps{
-                sh 'docker run -dt -p 8093:8093 --name c002 myimgcare'
+                sh 'docker run -dt -p 8095:8095 --name c003 myimglatest'
             }
         }   
     }
