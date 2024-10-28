@@ -1,42 +1,45 @@
-pipeline{
-    agent any
-    stages{
-        stage('checkout the code from github'){
-            steps{
-                 git url: 'https://github.com/karangaikwad89/star-agile-health-care.git'
-                 echo 'github url checkout'
-            }
-        }
-        stage('codecompile with karan'){
-            steps{
-                echo 'starting compiling'
-                sh 'mvn compile'
-            }
-        }
-        stage('codetesting with karan'){
-            steps{
-                sh 'mvn test'
-            }
-        }
-        stage('qa with karan'){
-            steps{
-                sh 'mvn checkstyle:checkstyle'
-            }
-        }
-        stage('package with karan'){
-            steps{
-                sh 'mvn package'
-            }
-        }
-        stage('run dockerfile'){
-          steps{
-               sh 'docker build -t myimgnew1 .'
+pipeline {
+  agent any
+     tools {
+       maven 'M2_HOME'
            }
-         }
-        stage('port expose'){
-            steps{
-                sh 'docker run -dt -p 8082:8082 --name c006 myimgnew1'
+     
+  stages {
+    stage('Git Checkout') {
+      steps {
+        echo 'This stage is to clone the repo from github'
+        git branch: 'master', url: 'https://github.com/karangaikwad89/star-agile-health-care.git'
+                        }
             }
-        }   
-    }
-}
+    stage('Create Package') {
+      steps {
+        echo 'This stage will compile, test, package my application'
+        sh 'mvn package'
+                          }
+            }
+    stage('Generate Test Report') {
+      steps {
+        echo 'This stage generate Test report using Testing'
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '/var/lib/jenkins/workspace/Healthcare/target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                          }
+            }
+     stage('Create Docker Image') {
+      steps {
+        echo 'This stage will Create a Docker image'
+        sh 'docker build -t gaikwadkar/healthcare:1.0 .'
+                          }
+            }
+     stage('Login to Dockerhub') {
+      steps {
+        echo 'This stage will loginto Dockerhub' 
+        withCredentials([usernamePassword(credentialsId: 'dockerloginnew', passwordVariable: 'dockerpass', usernameVariable: 'dockeruser')]) {
+        sh 'docker login -u ${dockeruser} -p ${dockerpass}'
+            }
+         }
+     }
+    stage('Docker Push-Image') {
+      steps {
+        echo 'This stage will push my new image to the dockerhub'
+        sh 'docker push cbabu85/healthcare:1.0'
+            }
+      }
