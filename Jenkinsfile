@@ -42,4 +42,7 @@ pipeline {
         echo 'This stage will push my new image to the dockerhub'
         sh 'docker push gaikwadkar/healthcare:1.0'
             }
-      }
+        }
+     }
+}
+  
